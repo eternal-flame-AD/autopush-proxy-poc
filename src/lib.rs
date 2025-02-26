@@ -1,6 +1,7 @@
 use std::{collections::HashMap, convert::Infallible, sync::Arc, time::Duration};
 
 use axum::{
+    body::Body,
     extract::{
         Path, State, WebSocketUpgrade,
         ws::{self, Utf8Bytes, WebSocket},
@@ -12,7 +13,7 @@ use axum::{
 use axum_extra::{
     TypedHeader,
     headers::{
-        Authorization, Header,
+        Authorization, ContentEncoding, ContentLength, Header,
         authorization::{Bearer, Credentials},
     },
 };
@@ -207,21 +208,27 @@ pub struct IngestPathParam {
 
 impl App {
     pub async fn handle_ingest(
+        TypedHeader(content_encoding): TypedHeader<ContentEncoding>,
         TypedHeader(Authorization(vapid)): TypedHeader<Authorization<Vapid>>,
         crypto_key: Option<TypedHeader<CryptoKey>>,
         encryption_salt: Option<TypedHeader<EncryptionSalt>>,
         Path(ingest_path): Path<IngestPathParam>,
+        body: Body,
     ) -> impl IntoResponse {
         info!(
             "ingest id={} vapid: {:?} crypto_key: {:?} encryption_salt: {:?}",
             ingest_path.id, vapid, crypto_key, encryption_salt
         );
 
+        if content_encoding.contains("aesgcm") || content_encoding.contains("aes128gcm") {
+            info!("Content encoding: aesgcm");
+        }
+
         StatusCode::NOT_IMPLEMENTED
     }
 
     pub async fn handle_ws<B: Backend + Clone>(
-        State(mut state): State<B>,
+        State(state): State<B>,
         upgrader: WebSocketUpgrade,
     ) -> impl IntoResponse {
         info!("got connection");

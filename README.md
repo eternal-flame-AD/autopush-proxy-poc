@@ -2,7 +2,7 @@
 
 PROOF OF CONCEPT STAGE
 
-This is a simple server that emulates the Mozilla autopush server. (WIP)
+This is a simple server that emulates the Mozilla autopush server, POC for running your custom push service for web-push capable web applications. (WIP)
 
 ## Progress
 
